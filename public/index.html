@@ -129,7 +129,7 @@
         async function fetchAssets() {
             if (isLoading) return;
             isLoading = true;
-            const response = await fetch(`/assets?page=${page}&keyword=${keyword}`);
+            const response = await fetch(`/search?keyword=${keyword}&page=${page}`);
             const assets = await response.json();
             const assetsDiv = document.getElementById('assets');
             assets.forEach(asset => {
