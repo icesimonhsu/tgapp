@@ -24,6 +24,24 @@
                 color: white;
             }
         }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .grid-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .grid-item img {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
     <script>
         window.Telegram.WebApp.ready();
@@ -35,6 +53,7 @@
 <body>
     <h1>Welcome to Telegram Simon Mini App</h1>
     <div id="messages"></div>
+    <div class="grid-container" id="assets"></div>
     <script>
         // Fetch messages from the server
         async function fetchMessages() {
@@ -49,9 +68,29 @@
             });
         }
 
-        // Fetch messages every 5 seconds
+        // Fetch assets from the server
+        async function fetchAssets() {
+            const response = await fetch('/assets');
+            const assets = await response.json();
+            const assetsDiv = document.getElementById('assets');
+            assetsDiv.innerHTML = '';
+            assets.forEach(asset => {
+                const assetElement = document.createElement('div');
+                assetElement.className = 'grid-item';
+                assetElement.innerHTML = `
+                    <img src="${asset.assetImageUrl}" alt="${asset.assetName}">
+                    <p>${asset.assetName}</p>
+                    <p>Token ID: ${asset.assetTokenId}</p>
+                `;
+                assetsDiv.appendChild(assetElement);
+            });
+        }
+
+        // Fetch messages and assets every 5 seconds
         setInterval(fetchMessages, 5000);
+        setInterval(fetchAssets, 5000);
         fetchMessages();
+        fetchAssets();
     </script>
 </body>
 

@@ -2,6 +2,7 @@ const { Telegraf } = require('telegraf');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000; // 使用 Heroku 提供的端口
@@ -11,6 +12,7 @@ app.use(express.static(path.join(__dirname, 'public'))); // 提供静态文件
 
 // 存储消息的数组
 let messages = [];
+let assets = [];
 
 // Telegram Bot Token
 const botToken = process.env.BOT_TOKEN;
@@ -45,10 +47,19 @@ bot.command('menu', (ctx) => {
 });
 
 // 处理文本消息
-bot.on('text', (ctx) => {
-    const message = ctx.message.text;
-    messages.push(message);
-    ctx.reply(`You said: ${message}`);
+bot.on('text', async (ctx) => {
+    const keyword = ctx.message.text;
+    messages.push(keyword);
+    ctx.reply(`Searching for: ${keyword}`);
+
+    try {
+        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=20&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=1`);
+        assets = response.data.items;
+        ctx.reply(`Found ${assets.length} assets for keyword: ${keyword}`);
+    } catch (error) {
+        console.error("Error fetching assets:", error);
+        ctx.reply("Error fetching assets. Please try again later.");
+    }
 });
 
 // 设置 webhook 处理路径
@@ -68,6 +79,11 @@ app.post('/webhook', (req, res) => {
 // 提供消息的 API
 app.get('/messages', (req, res) => {
     res.json(messages);
+});
+
+// 提供资产的 API
+app.get('/assets', (req, res) => {
+    res.json(assets);
 });
 
 // 确保其他路径可以返回正确的响应
