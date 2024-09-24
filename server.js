@@ -10,8 +10,9 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/webhook', (req, res) => {
-    const data = req.body;
-    console.log('Received data:', data);
+    const { message } = req.body;
+    console.log(message);
+    // 处理消息
     res.sendStatus(200);
 });
 
