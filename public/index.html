@@ -157,11 +157,8 @@
             assetsDiv.innerHTML = '';
         }
 
-        // Fetch messages and assets every 5 seconds
-        setInterval(fetchMessages, 5000);
-        setInterval(fetchAssets, 5000);
+        // Fetch messages on page load
         fetchMessages();
-        fetchAssets();
     </script>
 </body>
 
