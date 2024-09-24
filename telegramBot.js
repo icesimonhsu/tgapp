@@ -23,4 +23,9 @@ bot.command('menu', (ctx) => {
     });
 });
 
+bot.on('text', (ctx) => {
+    console.log("Received text message:", ctx.message.text);
+    ctx.reply(`You said: ${ctx.message.text}`);
+});
+
 bot.launch();
