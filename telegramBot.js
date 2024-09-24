@@ -1,13 +1,26 @@
-const TelegramBot = require('node-telegram-bot-api');
-const token = process.env.TELEGRAM_BOT_API_TOKEN;
+require('dotenv').config();
+const { Telegraf } = require('telegraf');
+const botToken = process.env.BOT_TOKEN;
 
-if (!token) {
-    throw new Error('TELEGRAM_BOT_API_TOKEN is not defined');
+if (!botToken) {
+    throw new Error('BOT_TOKEN is not defined');
 }
 
-const bot = new TelegramBot(token, { polling: true });
+// 使用 telegraf 初始化 bot
+const bot = new Telegraf(botToken);
 
-bot.on('message', (msg) => {
-    const chatId = msg.chat.id;
-    bot.sendMessage(chatId, 'Hello! This is a simple Telegram Mini app.');
+bot.start((ctx) => {
+    ctx.reply('Welcome! Use the menu to open the Mini App.');
 });
+
+bot.command('menu', (ctx) => {
+    ctx.reply('Choose an option:', {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: 'Open Mini App', web_app: { url: 'https://testtgtg-ad8398e9ed39.herokuapp.com/' } }]
+            ]
+        }
+    });
+});
+
+bot.launch();

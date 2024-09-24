@@ -1,21 +1,50 @@
+const { Telegraf } = require('telegraf');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+
 const app = express();
-const port = process.env.PORT || 3000; // 使用Heroku提供的端口
+const port = process.env.PORT || 3000; // 使用 Heroku 提供的端口
 
-app.use(bodyParser.json());
+app.use(bodyParser.json()); // 解析 JSON 请求
+app.use(express.static(path.join(__dirname, 'public'))); // 提供静态文件
 
-// 提供静态文件
-app.use(express.static(path.join(__dirname, 'public')));
+// Telegram Bot Token
+const botToken = process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN';
 
-app.post('/webhook', (req, res) => {
-    const { message } = req.body;
-    console.log(message);
-    // 处理消息
-    res.sendStatus(200);
+if (!botToken) {
+    throw new Error('BOT_TOKEN is not defined');
+}
+
+// 使用 Telegraf 初始化 Bot
+const bot = new Telegraf(botToken);
+
+// Webhook URL
+// const webhookUrl = process.env.WEBHOOK_URL || 'https://testtgtg-ad8398e9ed39.herokuapp.com/webhook';
+
+// // 设置 Webhook
+// bot.telegram.setWebhook(`${webhookUrl}`);
+
+// 处理 /start 命令
+bot.start((ctx) => {
+    ctx.reply('Welcome! Use the menu to open the Mini App.');
 });
 
+// 处理 /menu 命令，展示 Mini App 按钮
+bot.command('menu', (ctx) => {
+    ctx.reply('Choose an option:', {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: 'Open Mini App', web_app: { url: 'https://testtgtg-ad8398e9ed39.herokuapp.com/' } }]
+            ]
+        }
+    });
+});
+
+// 使用 Webhook 处理 Telegram 更新
+app.use(bot.webhookCallback('/webhook'));
+
+// 启动 Express 服务器
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
