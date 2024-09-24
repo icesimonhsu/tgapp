@@ -10,7 +10,7 @@ app.use(bodyParser.json()); // 解析 JSON 请求
 app.use(express.static(path.join(__dirname, 'public'))); // 提供静态文件
 
 // Telegram Bot Token
-const botToken = process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN';
+const botToken = process.env.BOT_TOKEN;
 
 if (!botToken) {
     throw new Error('BOT_TOKEN is not defined');
@@ -20,10 +20,10 @@ if (!botToken) {
 const bot = new Telegraf(botToken);
 
 // Webhook URL
-// const webhookUrl = process.env.WEBHOOK_URL || 'https://testtgtg-ad8398e9ed39.herokuapp.com/webhook';
+const webhookUrl = process.env.WEBHOOK_URL || 'https://testtgtg-ad8398e9ed39.herokuapp.com/webhook/webhook';
 
-// // 设置 Webhook
-// bot.telegram.setWebhook(`${webhookUrl}`);
+// 设置 Webhook
+bot.telegram.setWebhook(`${webhookUrl}`);
 
 // 处理 /start 命令
 bot.start((ctx) => {
@@ -35,7 +35,7 @@ bot.command('menu', (ctx) => {
     ctx.reply('Choose an option:', {
         reply_markup: {
             inline_keyboard: [
-                [{ text: 'Open Mini App', web_app: { url: 'https://testtgtg-ad8398e9ed39.herokuapp.com/' } }]
+                [{ text: 'Open Mini App', web_app: { url: 'https://testtgtg-ad8398e9ed39.herokuapp.com/webhook/' } }]
             ]
         }
     });
@@ -54,6 +54,7 @@ app.post('/webhook', (req, res) => {
         res.sendStatus(500);  // 返回 500 错误表示内部处理失败
     }
 });
+
 // 确保其他路径可以返回正确的响应
 app.get('/', (req, res) => {
     res.send('Hello, this is your bot server');
