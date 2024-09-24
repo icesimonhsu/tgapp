@@ -53,7 +53,7 @@ bot.on('text', async (ctx) => {
     ctx.reply(`Searching for: ${keyword}`);
 
     try {
-        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=20&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=1`);
+        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=30&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=1`);
         assets = response.data.items;
         ctx.reply(`Found ${assets.length} assets for keyword: ${keyword}`);
     } catch (error) {
@@ -83,14 +83,19 @@ app.get('/messages', (req, res) => {
 
 // 提供资产的 API
 app.get('/assets', (req, res) => {
-    res.json(assets);
+    const { page = 1, keyword = '' } = req.query;
+    const limit = 20;
+    const offset = (page - 1) * limit;
+    const filteredAssets = assets.filter(asset => asset.assetName.toLowerCase().includes(keyword.toLowerCase()));
+    const paginatedAssets = filteredAssets.slice(offset, offset + limit);
+    res.json(paginatedAssets);
 });
 
 // 搜索资产的 API
 app.get('/search', async (req, res) => {
-    const keyword = req.query.keyword;
+    const { keyword, page = 1 } = req.query;
     try {
-        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=20&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=1`);
+        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=20&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=${page}`);
         res.json(response.data.items);
     } catch (error) {
         console.error("Error fetching assets:", error);

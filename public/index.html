@@ -54,6 +54,13 @@
             border-radius: 5px;
         }
 
+        .grid-item p {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         @media (min-width: 768px) {
             .grid-container {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -101,6 +108,9 @@
     <div id="messages"></div>
     <div class="grid-container" id="assets"></div>
     <script>
+        let page = 1;
+        let keyword = '';
+
         // Fetch messages from the server
         async function fetchMessages() {
             const response = await fetch('/messages');
@@ -116,10 +126,9 @@
 
         // Fetch assets from the server
         async function fetchAssets() {
-            const response = await fetch('/assets');
+            const response = await fetch(`/assets?page=${page}&keyword=${keyword}`);
             const assets = await response.json();
             const assetsDiv = document.getElementById('assets');
-            assetsDiv.innerHTML = '';
             assets.forEach(asset => {
                 const assetElement = document.createElement('div');
                 assetElement.className = 'grid-item';
@@ -134,30 +143,39 @@
 
         // Search assets based on input keyword
         async function searchAssets() {
-            const keyword = document.getElementById('searchInput').value;
-            if (keyword) {
-                const response = await fetch(`/search?keyword=${keyword}`);
-                const assets = await response.json();
-                const assetsDiv = document.getElementById('assets');
-                assetsDiv.innerHTML = '';
-                assets.forEach(asset => {
-                    const assetElement = document.createElement('div');
-                    assetElement.className = 'grid-item';
-                    assetElement.innerHTML = `
-                        <img src="${asset.assetImageUrl}" alt="${asset.assetName}">
-                        <p>${asset.assetName}</p>
-                        <p>Token ID: ${asset.assetTokenId}</p>
-                    `;
-                    assetsDiv.appendChild(assetElement);
-                });
-            }
+            keyword = document.getElementById('searchInput').value;
+            page = 1; // Reset page number
+            const response = await fetch(`/search?keyword=${keyword}&page=${page}`);
+            const assets = await response.json();
+            const assetsDiv = document.getElementById('assets');
+            assetsDiv.innerHTML = ''; // Clear previous results
+            assets.forEach(asset => {
+                const assetElement = document.createElement('div');
+                assetElement.className = 'grid-item';
+                assetElement.innerHTML = `
+                    <img src="${asset.assetImageUrl}" alt="${asset.assetName}">
+                    <p>${asset.assetName}</p>
+                    <p>Token ID: ${asset.assetTokenId}</p>
+                `;
+                assetsDiv.appendChild(assetElement);
+            });
         }
 
         // Clear assets
         function clearAssets() {
             const assetsDiv = document.getElementById('assets');
             assetsDiv.innerHTML = '';
+            page = 1; // Reset page number
+            keyword = ''; // Clear keyword
         }
+
+        // Infinite scroll
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                page++;
+                fetchAssets();
+            }
+        });
 
         // Fetch messages on page load
         fetchMessages();
