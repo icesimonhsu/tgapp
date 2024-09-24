@@ -41,10 +41,14 @@ bot.command('menu', (ctx) => {
     });
 });
 
-// 使用 Webhook 处理 Telegram 更新
+// 设置 webhook 处理路径
 app.use(bot.webhookCallback('/webhook'));
 
-// 启动 Express 服务器
+// 确保其他路径可以返回正确的响应
+app.get('/', (req, res) => {
+    res.send('Hello, this is your bot server');
+});
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
