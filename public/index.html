@@ -99,7 +99,7 @@
 </head>
 
 <body>
-    <h1>Welcome to Telegram Simon Mini App</h1>
+    <h1>Simon Mini App</h1>
     <div class="controls">
         <input type="text" id="searchInput" placeholder="Enter keyword">
         <button onclick="searchAssets()">Search</button>
@@ -184,7 +184,7 @@
 
         // Infinite scroll
         window.addEventListener('scroll', debounce(() => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) { // 提前500px请求数据
                 page++;
                 fetchAssets();
             }
