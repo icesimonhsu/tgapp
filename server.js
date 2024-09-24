@@ -86,6 +86,18 @@ app.get('/assets', (req, res) => {
     res.json(assets);
 });
 
+// 搜索资产的 API
+app.get('/search', async (req, res) => {
+    const keyword = req.query.keyword;
+    try {
+        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=20&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=1`);
+        res.json(response.data.items);
+    } catch (error) {
+        console.error("Error fetching assets:", error);
+        res.status(500).send("Error fetching assets. Please try again later.");
+    }
+});
+
 // 确保其他路径可以返回正确的响应
 app.get('/', (req, res) => {
     res.send('Hello, this is your bot server');
