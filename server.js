@@ -9,6 +9,9 @@ const port = process.env.PORT || 3000; // 使用 Heroku 提供的端口
 app.use(bodyParser.json()); // 解析 JSON 请求
 app.use(express.static(path.join(__dirname, 'public'))); // 提供静态文件
 
+// 存储消息的数组
+let messages = [];
+
 // Telegram Bot Token
 const botToken = process.env.BOT_TOKEN;
 
@@ -41,6 +44,13 @@ bot.command('menu', (ctx) => {
     });
 });
 
+// 处理文本消息
+bot.on('text', (ctx) => {
+    const message = ctx.message.text;
+    messages.push(message);
+    ctx.reply(`You said: ${message}`);
+});
+
 // 设置 webhook 处理路径
 app.use(bot.webhookCallback('/webhook'));
 
@@ -53,6 +63,11 @@ app.post('/webhook', (req, res) => {
         console.error("Error processing webhook:", error);
         res.sendStatus(500);  // 返回 500 错误表示内部处理失败
     }
+});
+
+// 提供消息的 API
+app.get('/messages', (req, res) => {
+    res.json(messages);
 });
 
 // 确保其他路径可以返回正确的响应
