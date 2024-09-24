@@ -20,7 +20,7 @@ if (!botToken) {
 const bot = new Telegraf(botToken);
 
 // Webhook URL
-const webhookUrl = process.env.WEBHOOK_URL || 'https://testtgtg-ad8398e9ed39.herokuapp.com/webhook/webhook';
+const webhookUrl = process.env.WEBHOOK_URL || 'https://testtgtg-ad8398e9ed39.herokuapp.com/webhook';
 
 // 设置 Webhook
 bot.telegram.setWebhook(`${webhookUrl}`);
@@ -35,7 +35,7 @@ bot.command('menu', (ctx) => {
     ctx.reply('Choose an option:', {
         reply_markup: {
             inline_keyboard: [
-                [{ text: 'Open Mini App', web_app: { url: 'https://testtgtg-ad8398e9ed39.herokuapp.com/webhook/' } }]
+                [{ text: 'Open Mini App', web_app: { url: 'https://testtgtg-ad8398e9ed39.herokuapp.com/' } }]
             ]
         }
     });
@@ -47,7 +47,7 @@ app.use(bot.webhookCallback('/webhook'));
 app.post('/webhook', (req, res) => {
     try {
         const { message } = req.body;
-        console.log("Received message:", message);
+        console.log("Received message:", JSON.stringify(message, null, 2));
         res.sendStatus(200);  // 返回 200 OK 表示成功
     } catch (error) {
         console.error("Error processing webhook:", error);
