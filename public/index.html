@@ -5,6 +5,26 @@
     <title>TWA</title>
     <meta charset="UTF-8">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Day mode */
+        body {
+            background-color: white;
+            color: black;
+        }
+
+        /* Night mode */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: black;
+                color: white;
+            }
+        }
+    </style>
     <script>
         window.Telegram.WebApp.ready();
         // window.Telegram.WebApp.MainButton.setText('Open App');
