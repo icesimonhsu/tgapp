@@ -95,7 +95,7 @@ app.get('/assets', (req, res) => {
 app.get('/search', async (req, res) => {
     const { keyword, page = 1 } = req.query;
     try {
-        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=20&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=${page}`);
+        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=30&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=${page}`);
         res.json(response.data.items);
     } catch (error) {
         console.error("Error fetching assets:", error);

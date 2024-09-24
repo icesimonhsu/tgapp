@@ -110,6 +110,7 @@
     <script>
         let page = 1;
         let keyword = '';
+        let isLoading = false;
 
         // Fetch messages from the server
         async function fetchMessages() {
@@ -126,6 +127,8 @@
 
         // Fetch assets from the server
         async function fetchAssets() {
+            if (isLoading) return;
+            isLoading = true;
             const response = await fetch(`/assets?page=${page}&keyword=${keyword}`);
             const assets = await response.json();
             const assetsDiv = document.getElementById('assets');
@@ -139,6 +142,7 @@
                 `;
                 assetsDiv.appendChild(assetElement);
             });
+            isLoading = false;
         }
 
         // Search assets based on input keyword
@@ -169,13 +173,22 @@
             keyword = ''; // Clear keyword
         }
 
+        // Debounce function to limit the rate of function execution
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
         // Infinite scroll
-        window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        window.addEventListener('scroll', debounce(() => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
                 page++;
                 fetchAssets();
             }
-        });
+        }, 200));
 
         // Fetch messages on page load
         fetchMessages();
