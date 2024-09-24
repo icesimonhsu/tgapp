@@ -44,6 +44,16 @@ bot.command('menu', (ctx) => {
 // 设置 webhook 处理路径
 app.use(bot.webhookCallback('/webhook'));
 
+app.post('/webhook', (req, res) => {
+    try {
+        const { message } = req.body;
+        console.log("Received message:", message);
+        res.sendStatus(200);  // 返回 200 OK 表示成功
+    } catch (error) {
+        console.error("Error processing webhook:", error);
+        res.sendStatus(500);  // 返回 500 错误表示内部处理失败
+    }
+});
 // 确保其他路径可以返回正确的响应
 app.get('/', (req, res) => {
     res.send('Hello, this is your bot server');
