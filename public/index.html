@@ -17,11 +17,19 @@
             color: black;
         }
 
+        .grid-item {
+            background-color: #f9f9f9;
+        }
+
         /* Night mode */
         @media (prefers-color-scheme: dark) {
             body {
                 background-color: black;
                 color: white;
+            }
+
+            .grid-item {
+                background-color: #333;
             }
         }
 
@@ -33,7 +41,6 @@
         }
 
         .grid-item {
-            background-color: #f9f9f9;
             padding: 10px;
             text-align: center;
             border-radius: 5px;
