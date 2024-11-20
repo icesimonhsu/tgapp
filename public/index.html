@@ -143,7 +143,7 @@
 </head>
 
 <body>
-    <h1>Simon Mini App</h1>
+    <h1>Lootex Mini App</h1>
     <div class="controls">
         <input type="text" id="searchInput" placeholder="Enter keyword">
         <button onclick="searchAssets()">Search</button>
@@ -153,6 +153,7 @@
         let page = 1;
         let keyword = '';
         let isLoading = false;
+        let searchTimeout;
 
         // Fetch messages from the server
         async function fetchMessages() {
@@ -221,7 +222,7 @@
                     const assetElement = document.createElement('div');
                     assetElement.className = 'grid-item';
                     assetElement.innerHTML = `
-                        <img src="${asset.assetImageUrl}" alt="${asset.assetName}" onerror="this.src='placeholder.jpg'">
+                        <img src="${asset.assetImageUrl || 'path/to/placeholder/image.png'}" alt="${asset.assetName}" onerror="this.src='path/to/placeholder/image.png'">
                         <div class="item-details">
                             <p class="item-name">${asset.assetName}</p>
                             <p class="item-collection">${asset.collection}</p>
@@ -249,10 +250,9 @@
 
         // Debounce function to limit the rate of function execution
         function debounce(func, wait) {
-            let timeout;
             return function (...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => func.apply(this, args), wait);
             };
         }
 
