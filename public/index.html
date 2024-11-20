@@ -219,6 +219,7 @@
                 }
 
                 assets.forEach(asset => {
+                    const shortTokenId = asset.assetTokenId.length > 10 ? `${asset.assetTokenId.slice(0, 10)}...` : asset.assetTokenId; // 缩短 tokenId
                     const assetElement = document.createElement('div');
                     assetElement.className = 'grid-item';
                     assetElement.innerHTML = `
@@ -228,7 +229,7 @@
                             <p class="item-collection">${asset.collection}</p>
                             <p class="item-price">Price: ${asset.price} ETH</p>
                             <p class="item-blockchain">${asset.blockchain}</p>
-                            <p>Token ID: ${asset.assetTokenId}</p>
+                            <p>Token ID: ${shortTokenId} <button onclick="copyTokenId('${asset.assetTokenId}')">📋</button></p> <!-- 添加复制按钮 -->
                         </div>
                     `;
                     assetsDiv.appendChild(assetElement);
@@ -259,10 +260,12 @@
         // Infinite scroll
         window.addEventListener('scroll', debounce(() => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) { // 提前500px请求数据
-                page++;
-                fetchAssets();
+                if (!isLoading) { // 确保在加载时不重复请求
+                    page++;
+                    fetchAssets();
+                }
             }
-        }, 200));
+        }, 200)); // 调整防抖动时间
 
         // Fetch messages on page load
         fetchMessages();
@@ -271,6 +274,15 @@
         document.getElementById('searchInput').addEventListener('input', debounce(() => {
             searchAssets();
         }, 500));
+
+        // 复制 tokenId 的函数
+        function copyTokenId(tokenId) {
+            navigator.clipboard.writeText(tokenId).then(() => {
+                alert('Token ID copied to clipboard!'); // 提示用户已复制
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
     </script>
 </body>
 
