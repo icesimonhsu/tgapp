@@ -2,13 +2,13 @@ const { Telegraf } = require('telegraf');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const axios = require('axios');
+const axios = require('axios').default;
 
 const app = express();
-const port = process.env.PORT || 3000; // 使用 Heroku 提供的端口
+const port = process.env.PORT || 3000;
 
-app.use(bodyParser.json()); // 解析 JSON 请求
-app.use(express.static(path.join(__dirname, 'public'))); // 提供静态文件
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 存储消息的数组
 let messages = [];
@@ -21,26 +21,24 @@ if (!botToken) {
     throw new Error('BOT_TOKEN is not defined');
 }
 
-// 使用 Telegraf 初始化 Bot
 const bot = new Telegraf(botToken);
 
-// Webhook URL
-const webhookUrl = process.env.WEBHOOK_URL || 'https://testtgtg-ad8398e9ed39.herokuapp.com/webhook';
+// 更新这些常量
+const VERCEL_URL = 'https://tgapp-chi.vercel.app';
+const webhookUrl = process.env.WEBHOOK_URL || `${VERCEL_URL}/webhook`;
 
 // 设置 Webhook
 bot.telegram.setWebhook(`${webhookUrl}`);
 
-// 处理 /start 命令
 bot.start((ctx) => {
     ctx.reply('Welcome! Use the menu to open the Mini App.');
 });
 
-// 处理 /menu 命令，展示 Mini App 按钮
 bot.command('menu', (ctx) => {
-    ctx.reply('Choose an option:', {
+    ctx.reply('选择操作:', {
         reply_markup: {
             inline_keyboard: [
-                [{ text: 'Open Mini App', web_app: { url: 'https://testtgtg-ad8398e9ed39.herokuapp.com/' } }]
+                [{ text: '打开 Mini App', web_app: { url: VERCEL_URL } }]
             ]
         }
     });
@@ -53,7 +51,15 @@ bot.on('text', async (ctx) => {
     ctx.reply(`Searching for: ${keyword}`);
 
     try {
-        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=30&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=1`);
+        const response = await axios.get('https://v3-api.lootex.io/api/v3/explore/assets', {
+            params: {
+                limit: 30,
+                sortBy: '-createdAt',
+                keywords: keyword,
+                isCount: false,
+                page: 1
+            }
+        });
         assets = response.data.items;
         ctx.reply(`Found ${assets.length} assets for keyword: ${keyword}`);
     } catch (error) {
@@ -62,52 +68,98 @@ bot.on('text', async (ctx) => {
     }
 });
 
-// 设置 webhook 处理路径
-app.use(bot.webhookCallback('/webhook'));
-
-app.post('/webhook', (req, res) => {
-    try {
-        const { message } = req.body;
-        console.log("Received message:", JSON.stringify(message, null, 2));
-        res.sendStatus(200);  // 返回 200 OK 表示成功
-    } catch (error) {
-        console.error("Error processing webhook:", error);
-        res.sendStatus(500);  // 返回 500 错误表示内部处理失败
-    }
-});
-
-// 提供消息的 API
+// API 路由
 app.get('/messages', (req, res) => {
     res.json(messages);
 });
 
-// 提供资产的 API
 app.get('/assets', (req, res) => {
-    const { page = 1, keyword = '' } = req.query;
+    const page = Number(req.query.page || 1);
+    const searchKeyword = String(req.query.keyword || '');
     const limit = 20;
     const offset = (page - 1) * limit;
-    const filteredAssets = assets.filter(asset => asset.assetName.toLowerCase().includes(keyword.toLowerCase()));
-    const paginatedAssets = filteredAssets.slice(offset, offset + limit);
-    res.json(paginatedAssets);
-});
 
-// 搜索资产的 API
-app.get('/search', async (req, res) => {
-    const { keyword, page = 1 } = req.query;
     try {
-        const response = await axios.get(`https://v3-api.lootex.io/api/v3/explore/assets?limit=30&sortBy=bestListPrice&keywords=${keyword}&isCount=false&page=${page}`);
-        res.json(response.data.items);
+        const filteredAssets = assets.filter(asset =>
+            asset.assetName.toLowerCase().includes(searchKeyword.toLowerCase())
+        );
+        const paginatedAssets = filteredAssets.slice(offset, offset + limit);
+        res.json(paginatedAssets);
     } catch (error) {
-        console.error("Error fetching assets:", error);
-        res.status(500).send("Error fetching assets. Please try again later.");
+        console.error("Error processing assets:", error);
+        res.status(500).json({
+            error: "Error processing assets",
+            details: error.message
+        });
     }
 });
 
-// 确保其他路径可以返回正确的响应
-app.get('/', (req, res) => {
-    res.send('Hello, this is your bot server');
+app.get('/search', async (req, res) => {
+    const keyword = String(req.query.keyword || '');
+    const page = Number(req.query.page || 1);
+
+    try {
+        const apiUrl = 'https://v3-api.lootex.io/api/v3/explore/assets';
+
+        console.log('Received search request:', { keyword, page });
+
+        const response = await axios.get(apiUrl, {
+            params: {
+                limit: 30,
+                sortBy: '-createdAt',
+                keywords: keyword,
+                isCount: false,
+                page: page
+            }
+        });
+
+        console.log('Lootex API response status:', response.status);
+
+        if (!response.data || !response.data.items) {
+            console.log('No items in response:', response.data);
+            return res.json([]);
+        }
+
+        const items = response.data.items.map(item => ({
+            assetName: item.assetName || 'Unnamed Asset',
+            assetTokenId: item.assetTokenId || 'No ID',
+            assetImageUrl: item.assetImageUrl || '',
+            price: item.bestListPrice || 'No Price',
+            collection: item.collectionName || 'Unknown Collection',
+            blockchain: item.chainName || 'Unknown Chain'
+        }));
+
+        console.log(`Found ${items.length} items`);
+        res.json(items);
+
+    } catch (error) {
+        console.error('Search error:', {
+            message: error.message,
+            stack: error.stack,
+            response: error.response?.data
+        });
+
+        res.status(500).json({
+            error: "Search failed",
+            message: error.message
+        });
+    }
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+app.use((err, req, res, next) => {
+    console.error('Global error handler:', err);
+    res.status(500).json({
+        error: "Server error",
+        message: err.message
+    });
+});
+
+// 使用 bot webhook
+app.use(bot.webhookCallback('/webhook'));
+
+// 导出 express app 以供 Vercel 使用
+module.exports = app;

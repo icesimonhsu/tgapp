@@ -17,7 +17,7 @@ bot.command('menu', (ctx) => {
     ctx.reply('Choose an option:', {
         reply_markup: {
             inline_keyboard: [
-                [{ text: 'Open Mini App', web_app: { url: 'https://testtgtg-ad8398e9ed39.herokuapp.com/' } }]
+                [{ text: 'Open Mini App', web_app: { url: 'https://tgapp-chi.vercel.app' } }]
             ]
         }
     });

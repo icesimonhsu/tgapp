@@ -34,42 +34,86 @@
         }
 
         .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 10px;
             padding: 10px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .grid-item {
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            gap: 20px;
+            transition: transform 0.2s;
+        }
+
+        .grid-item:hover {
+            transform: translateX(5px);
         }
 
         .grid-item img {
-            max-width: 100%;
-            max-height: 150px;
-            width: auto;
-            height: auto;
-            border-radius: 5px;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
         }
 
-        .grid-item p {
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .item-details {
+            flex-grow: 1;
+            text-align: left;
         }
 
-        @media (min-width: 768px) {
-            .grid-container {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        .item-details p {
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .item-name {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .item-price {
+            color: #2196F3;
+            font-weight: bold;
+        }
+
+        .item-collection {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .item-blockchain {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            font-size: 0.8em;
+        }
+
+        /* 深色模式調整 */
+        @media (prefers-color-scheme: dark) {
+            .grid-item {
+                background-color: #333;
             }
-        }
 
-        @media (min-width: 1024px) {
-            .grid-container {
-                grid-template-columns: repeat(8, 1fr);
+            .item-collection {
+                color: #aaa;
+            }
+
+            .item-blockchain {
+                background-color: #1a237e;
+                color: #90caf9;
+            }
+
+            .item-price {
+                color: #64b5f6;
             }
         }
 
@@ -93,8 +137,8 @@
     </style>
     <script>
         window.Telegram.WebApp.ready();
-        // window.Telegram.WebApp.MainButton.setText('Open App');
-        // window.Telegram.WebApp.MainButton.show();
+        window.Telegram.WebApp.MainButton.setText('Open App');
+        window.Telegram.WebApp.MainButton.show();
     </script>
 </head>
 
@@ -103,9 +147,7 @@
     <div class="controls">
         <input type="text" id="searchInput" placeholder="Enter keyword">
         <button onclick="searchAssets()">Search</button>
-        <button onclick="clearAssets()">Clear</button>
     </div>
-    <div id="messages"></div>
     <div class="grid-container" id="assets"></div>
     <script>
         let page = 1;
@@ -147,22 +189,54 @@
 
         // Search assets based on input keyword
         async function searchAssets() {
-            keyword = document.getElementById('searchInput').value;
-            page = 1; // Reset page number
-            const response = await fetch(`/search?keyword=${keyword}&page=${page}`);
-            const assets = await response.json();
-            const assetsDiv = document.getElementById('assets');
-            assetsDiv.innerHTML = ''; // Clear previous results
-            assets.forEach(asset => {
-                const assetElement = document.createElement('div');
-                assetElement.className = 'grid-item';
-                assetElement.innerHTML = `
-                    <img src="${asset.assetImageUrl}" alt="${asset.assetName}">
-                    <p>${asset.assetName}</p>
-                    <p>Token ID: ${asset.assetTokenId}</p>
-                `;
-                assetsDiv.appendChild(assetElement);
-            });
+            try {
+                const searchInput = document.getElementById('searchInput');
+                keyword = searchInput.value.trim();
+
+                if (!keyword) {
+                    console.log('Empty search keyword');
+                    return;
+                }
+
+                console.log('Searching for:', keyword);
+
+                const response = await fetch(`/search?keyword=${encodeURIComponent(keyword)}&page=${page}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const assets = await response.json();
+                console.log('Search results:', assets);
+
+                const assetsDiv = document.getElementById('assets');
+                assetsDiv.innerHTML = '';
+
+                if (assets.length === 0) {
+                    assetsDiv.innerHTML = '<p>No results found</p>';
+                    return;
+                }
+
+                assets.forEach(asset => {
+                    const assetElement = document.createElement('div');
+                    assetElement.className = 'grid-item';
+                    assetElement.innerHTML = `
+                        <img src="${asset.assetImageUrl}" alt="${asset.assetName}" onerror="this.src='placeholder.jpg'">
+                        <div class="item-details">
+                            <p class="item-name">${asset.assetName}</p>
+                            <p class="item-collection">${asset.collection}</p>
+                            <p class="item-price">Price: ${asset.price} ETH</p>
+                            <p class="item-blockchain">${asset.blockchain}</p>
+                            <p>Token ID: ${asset.assetTokenId}</p>
+                        </div>
+                    `;
+                    assetsDiv.appendChild(assetElement);
+                });
+            } catch (error) {
+                console.error('Search error:', error);
+                const assetsDiv = document.getElementById('assets');
+                assetsDiv.innerHTML = '<p>Error loading assets. Please try again later.</p>';
+            }
         }
 
         // Clear assets
@@ -192,6 +266,11 @@
 
         // Fetch messages on page load
         fetchMessages();
+
+        // Add input event listener
+        document.getElementById('searchInput').addEventListener('input', debounce(() => {
+            searchAssets();
+        }, 500));
     </script>
 </body>
 
