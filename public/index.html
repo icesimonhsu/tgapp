@@ -134,12 +134,52 @@
             font-size: 16px;
             cursor: pointer;
         }
+
+        .image-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: #666;
+        }
+
+        .image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-container img.loaded {
+            opacity: 1;
+        }
+
+        /* 深色模式下的 placeholder */
+        @media (prefers-color-scheme: dark) {
+            .placeholder {
+                background-color: #333;
+                color: #999;
+            }
+        }
     </style>
-    <script>
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.MainButton.setText('Open App');
-        window.Telegram.WebApp.MainButton.show();
-    </script>
 </head>
 
 <body>
@@ -219,17 +259,31 @@
                 }
 
                 assets.forEach(asset => {
-                    const shortTokenId = asset.assetTokenId.length > 10 ? `${asset.assetTokenId.slice(0, 10)}...` : asset.assetTokenId; // 缩短 tokenId
+                    const shortTokenId = asset.assetTokenId.length > 10 ?
+                        `${asset.assetTokenId.slice(0, 10)}...` : asset.assetTokenId;
+
                     const assetElement = document.createElement('div');
                     assetElement.className = 'grid-item';
                     assetElement.innerHTML = `
-                        <img src="${asset.assetImageUrl || 'path/to/placeholder/image.png'}" alt="${asset.assetName}" onerror="this.src='path/to/placeholder/image.png'">
+                        <div class="image-container">
+                            <div class="placeholder">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                            </div>
+                            <img src="${asset.assetImageUrl}" 
+                                 alt="${asset.assetName}"
+                                 onload="this.classList.add('loaded')"
+                                 onerror="this.parentElement.innerHTML='<div class=\'placeholder\'>❌</div>'">
+                        </div>
                         <div class="item-details">
                             <p class="item-name">${asset.assetName}</p>
                             <p class="item-collection">${asset.collection}</p>
                             <p class="item-price">Price: ${asset.price} ETH</p>
                             <p class="item-blockchain">${asset.blockchain}</p>
-                            <p>Token ID: ${shortTokenId} <button onclick="copyTokenId('${asset.assetTokenId}')">📋</button></p> <!-- 添加复制按钮 -->
+                            <p>Token ID: ${shortTokenId} <button onclick="copyTokenId('${asset.assetTokenId}')">📋</button></p>
                         </div>
                     `;
                     assetsDiv.appendChild(assetElement);
@@ -282,7 +336,7 @@
             }).catch(err => {
                 console.error('Failed to copy: ', err);
             });
-        }   
+        }
     </script>
 </body>
 
