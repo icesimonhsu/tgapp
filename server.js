@@ -24,7 +24,7 @@ if (!botToken) {
 const bot = new Telegraf(botToken);
 
 // 更新这些常量
-const VERCEL_URL = 'https://tgapp-eba5.vercel.app';
+const VERCEL_URL = 'https://tgapp-chi.vercel.app';
 const webhookUrl = process.env.WEBHOOK_URL || `${VERCEL_URL}/webhook`;
 
 // 设置 Webhook

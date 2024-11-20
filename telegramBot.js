@@ -17,7 +17,7 @@ bot.command('menu', (ctx) => {
     ctx.reply('Choose an option:', {
         reply_markup: {
             inline_keyboard: [
-                [{ text: 'Open Mini App', web_app: { url: 'https://tgapp-eba5.vercel.app' } }]
+                [{ text: 'Open Mini App', web_app: { url: 'https://tgapp-chi.vercel.app' } }]
             ]
         }
     });
