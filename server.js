@@ -128,18 +128,13 @@ app.get('/search', async (req, res) => {
             assetName: item.assetName || 'Unnamed Asset',
             assetTokenId: item.assetTokenId || 'No ID',
             assetImageUrl: item.assetImageUrl || '',
-            price: item.bestListPrice || 'No Price',
-            collection: item.collectionName || 'Unknown Collection',
-            blockchain: item.chainName || 'Unknown Chain'
+            collectionName: item.collectionName || 'Unknown Collection',
+            collectionChainShortName: item.collectionChainShortName || 'Unknown',
+            order: item.order || null
         }));
 
-        const itemsWithPlaceholder = items.map(item => ({
-            ...item,
-            assetImageUrl: item.assetImageUrl || 'path/to/placeholder/image.png'
-        }));
-
-        console.log(`Found ${itemsWithPlaceholder.length} items`);
-        res.json(itemsWithPlaceholder);
+        console.log(`Found ${items.length} items`);
+        res.json(items);
 
     } catch (error) {
         console.error('Search error:', {
