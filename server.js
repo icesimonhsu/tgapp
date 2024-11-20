@@ -54,7 +54,7 @@ bot.on('text', async (ctx) => {
         const response = await axios.get('https://v3-api.lootex.io/api/v3/explore/assets', {
             params: {
                 limit: 30,
-                sortBy: '-createdAt',
+                sortBy: '-bestListPrice',
                 keywords: keyword,
                 isCount: false,
                 page: 1
@@ -106,7 +106,7 @@ app.get('/search', async (req, res) => {
         const response = await axios.get(apiUrl, {
             params: {
                 limit: 30,
-                sortBy: '-createdAt',
+                sortBy: '-bestListPrice',
                 keywords: keyword,
                 isCount: false,
                 page: page

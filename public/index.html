@@ -9,6 +9,7 @@
         body {
             font-family: Arial, sans-serif;
             transition: background-color 0.3s, color 0.3s;
+            font-size: 14px;
         }
 
         /* Day mode */
@@ -69,32 +70,33 @@
         }
 
         .item-details p {
-            margin: 5px 0;
-            line-height: 1.4;
+            margin: 3px 0;
+            line-height: 1.3;
         }
 
         .item-name {
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1em;
         }
 
         .item-price {
             color: #2196F3;
             font-weight: bold;
+            font-size: 0.9em;
         }
 
         .item-collection {
             color: #666;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
 
         .item-blockchain {
             background-color: #e3f2fd;
             color: #1565c0;
-            padding: 2px 8px;
+            padding: 1px 6px;
             border-radius: 4px;
             display: inline-block;
-            font-size: 0.8em;
+            font-size: 0.75em;
         }
 
         /* 深色模式調整 */
@@ -137,8 +139,8 @@
 
         .image-container {
             position: relative;
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             background-color: #f0f0f0;
             border-radius: 8px;
             overflow: hidden;
@@ -262,6 +264,11 @@
                     const shortTokenId = asset.assetTokenId.length > 10 ?
                         `${asset.assetTokenId.slice(0, 10)}...` : asset.assetTokenId;
 
+                    let priceDisplay = 'No Price';
+                    if (asset.order && asset.order.listing) {
+                        priceDisplay = `${asset.order.listing.price} ${asset.order.listing.priceSymbol}`;
+                    }
+
                     const assetElement = document.createElement('div');
                     assetElement.className = 'grid-item';
                     assetElement.innerHTML = `
@@ -280,10 +287,10 @@
                         </div>
                         <div class="item-details">
                             <p class="item-name">${asset.assetName}</p>
-                            <p class="item-collection">${asset.collection}</p>
-                            <p class="item-price">Price: ${asset.price} ETH</p>
-                            <p class="item-blockchain">${asset.blockchain}</p>
-                            <p>Token ID: ${shortTokenId} <button onclick="copyTokenId('${asset.assetTokenId}')">📋</button></p>
+                            <p class="item-collection">${asset.collectionName}</p>
+                            <p class="item-price">Price: ${priceDisplay}</p>
+                            <p class="item-blockchain">${asset.collectionChainShortName?.toUpperCase() || 'Unknown Chain'}</p>
+                            <p class="token-id">Token ID: ${shortTokenId} <button onclick="copyTokenId('${asset.assetTokenId}')">📋</button></p>
                         </div>
                     `;
                     assetsDiv.appendChild(assetElement);
