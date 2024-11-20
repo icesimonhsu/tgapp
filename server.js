@@ -129,8 +129,13 @@ app.get('/search', async (req, res) => {
             blockchain: item.chainName || 'Unknown Chain'
         }));
 
-        console.log(`Found ${items.length} items`);
-        res.json(items);
+        const itemsWithPlaceholder = items.map(item => ({
+            ...item,
+            assetImageUrl: item.assetImageUrl || 'path/to/placeholder/image.png'
+        }));
+
+        console.log(`Found ${itemsWithPlaceholder.length} items`);
+        res.json(itemsWithPlaceholder);
 
     } catch (error) {
         console.error('Search error:', {
