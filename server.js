@@ -133,6 +133,17 @@ app.get('/search', async (req, res) => {
             order: item.order || null
         }));
 
+        // 检查价格和链的提取
+        items.forEach(item => {
+            if (item.order && item.order.listing) {
+                item.price = `${item.order.listing.price} ${item.order.listing.priceSymbol}`;
+            } else {
+                item.price = 'No Price';
+            }
+
+            item.collectionChainShortName = item.collectionChainShortName || 'Unknown Chain';
+        });
+
         console.log(`Found ${items.length} items`);
         res.json(items);
 
