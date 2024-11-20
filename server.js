@@ -115,6 +115,10 @@ app.get('/search', async (req, res) => {
 
         console.log('Lootex API response status:', response.status);
 
+        if (response.status !== 200) {
+            throw new Error(`API responded with status: ${response.status}`);
+        }
+
         if (!response.data || !response.data.items) {
             console.log('No items in response:', response.data);
             return res.json([]);
@@ -146,7 +150,8 @@ app.get('/search', async (req, res) => {
 
         res.status(500).json({
             error: "Search failed",
-            message: error.message
+            message: error.message,
+            details: error.response?.data || 'No additional details available'
         });
     }
 });
