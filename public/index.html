@@ -380,6 +380,11 @@
     </div>
 
     <script>
+        // 添加页码变量
+        let page = 1;
+        let isLoading = false;
+        let currentPeriod = 'today';
+
         // 将这些变量移到全局作用域
         let currentSlug = '';
         let nftPage = 1;
@@ -439,8 +444,26 @@
                 : 'https://v3-api.lootex.io';
         }
 
-        // 修改 fetchHotCollections 函数中的 API 请求
+        // 添加 pinataGateway 常量
+        const pinataGateway = 'https://lootex.mypinata.cloud/ipfs';
+
+        // 添加 pinataLoader 函数
+        function pinataLoader(url) {
+            if (!url) return url;
+            return url
+                .replace(/^ipfs:\/\//, `${pinataGateway}/`)
+                .replace(/^ipfs:\/\/ipfs\//, `${pinataGateway}/`)
+                .replace(/^https:\/\/gateway.pinata.cloud\/ipfs/, `${pinataGateway}`)
+                .replace(/^https:\/\/maticpunks.mypinata.cloud\/ipfs/, `${pinataGateway}`)
+                .replace(/^https:\/\/ipfs.infura.io\/ipfs/, `${pinataGateway}`)
+                .replace(/^https:\/\/ipfs.moralis.io:2053\/ipfs/, `${pinataGateway}`)
+                .replace(/^https:\/\/(.*)\.ipfs\.nftstorage\.link/, `${pinataGateway}/$1`);
+        }
+
+        // 修改 fetchHotCollections 函数
         async function fetchHotCollections(period = 'today') {
+            if (isLoading) return;
+            
             try {
                 console.log('Fetching collections for period:', period);
                 isLoading = true;
@@ -479,9 +502,12 @@
                     collectionElement.className = 'grid-item';
                     
                     let logoUrl = collection.logoImageUrl;
+                    // 处理 S3 URL
                     if (logoUrl && logoUrl.startsWith('https://lootex-dev-s3-cdn.imgix.net')) {
                         logoUrl = logoUrl.replace('https://lootex-dev-s3-cdn.imgix.net', 'https://lootex-dev.s3.amazonaws.com');
                     }
+                    // 处理 IPFS URL
+                    logoUrl = pinataLoader(logoUrl);
                     
                     collectionElement.innerHTML = `
                         <div class="image-container">
@@ -568,9 +594,12 @@
 
                 items.forEach(nft => {
                     let imageUrl = nft.assetImageUrl;
+                    // 处理 S3 URL
                     if (imageUrl && imageUrl.startsWith('https://lootex-dev-s3-cdn.imgix.net')) {
                         imageUrl = imageUrl.replace('https://lootex-dev-s3-cdn.imgix.net', 'https://lootex-dev.s3.amazonaws.com');
                     }
+                    // 处理 IPFS URL
+                    imageUrl = pinataLoader(imageUrl);
 
                     const price = nft.order?.listing?.price 
                         ? `${nft.order.listing.price} ${nft.order.listing.priceSymbol}`
