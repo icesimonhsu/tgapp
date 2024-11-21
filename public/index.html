@@ -62,12 +62,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .image-container img.loaded {
-            opacity: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
 
         .placeholder {
@@ -80,6 +78,7 @@
             align-items: center;
             justify-content: center;
             color: #666;
+            z-index: 0;
         }
 
         .item-details {
@@ -265,11 +264,17 @@
                     
                     collectionElement.innerHTML = `
                         <div class="image-container">
-                            <div class="placeholder">Loading...</div>
+                            <div class="placeholder">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="24" height="24" fill="none"/>
+                                    <path d="M12 4V2M12 22v-2M4 12H2m20 0h-2m-2.828-5.172L18.586 5.414M5.414 18.586l1.414-1.414M5.414 5.414l1.414 1.414m11.758 11.758l-1.414-1.414" 
+                                          stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
                             <img src="${logoUrl}" 
                                  alt="${collection.name}"
-                                 onload="this.classList.add('loaded')"
-                                 onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'>No Image</div>'">
+                                 onload="this.parentElement.querySelector('.placeholder').style.display='none'"
+                                 onerror="this.parentElement.querySelector('.placeholder').innerHTML='<span>No Image</span>'">
                         </div>
                         <div class="item-details">
                             <p class="item-name">${collection.name || 'Unnamed Collection'}</p>
