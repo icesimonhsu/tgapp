@@ -204,6 +204,11 @@
                         ? `${asset.assetTokenId.slice(0, 8)}...` 
                         : asset.assetTokenId || 'N/A';
 
+                    let priceDisplay = 'No Price';
+                    if (asset.order && asset.order.listing) {
+                        priceDisplay = `${asset.order.listing.price} ${asset.order.listing.priceSymbol}`;
+                    }
+
                     assetElement.innerHTML = `
                         <div class="image-container">
                             <div class="placeholder">Loading...</div>
@@ -215,7 +220,7 @@
                         <div class="item-details">
                             <p class="item-name">${asset.assetName || 'Unnamed Asset'}</p>
                             <p class="item-collection">${asset.collectionName || 'Unknown Collection'}</p>
-                            <p class="item-price">Price: ${asset.bestListPrice || 'Not listed'}</p>
+                            <p class="item-price">Price: ${priceDisplay}</p>
                             <p>Token ID: ${shortTokenId}</p>
                         </div>
                     `;
