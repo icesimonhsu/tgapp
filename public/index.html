@@ -396,32 +396,54 @@
     </div>
 
     <script>
-        // 在脚本开始处添加这段代码
+        // 在脚本开始处修改这段代码
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.expand(); // 展开 webapp
-            // 禁用下拉关闭手势
-            window.Telegram.WebApp.setBackgroundColor('#ffffff'); // 设置背景色
-            window.Telegram.WebApp.enableClosingConfirmation(); // 启用关闭确认
+            window.Telegram.WebApp.setBackgroundColor('#ffffff');
+            window.Telegram.WebApp.enableClosingConfirmation();
+            // 禁用页面弹性滚动
+            document.body.style.overscrollBehavior = 'none';
         }
 
-        // 添加触摸事件处理，防止下拉关闭
+        // 修改触摸事件处理
+        let startY = 0;
+        
         document.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].pageY;
             const target = e.target;
             const scrollableElement = target.closest('.nft-grid, .grid-container') || document.documentElement;
             
-            if (scrollableElement.scrollTop === 0) {
-                scrollableElement.scrollTop = 1;
+            // 如果在顶部，阻止默认行为
+            if (scrollableElement.scrollTop <= 0) {
+                e.preventDefault();
             }
-        }, { passive: true });
+        }, { passive: false });
 
         document.addEventListener('touchmove', function(e) {
+            const currentY = e.touches[0].pageY;
             const target = e.target;
             const scrollableElement = target.closest('.nft-grid, .grid-container') || document.documentElement;
             
-            if (scrollableElement.scrollTop === 0) {
-                scrollableElement.scrollTop = 1;
+            // 如果在顶部并且是下拉动作
+            if (scrollableElement.scrollTop <= 0 && currentY > startY) {
+                e.preventDefault();
             }
-        }, { passive: true });
+        }, { passive: false });
+
+        // 添加 CSS 样式来禁用弹性滚动
+        const style = document.createElement('style');
+        style.textContent = `
+            body, .nft-grid, .grid-container {
+                overscroll-behavior: none !important;
+                -webkit-overflow-scrolling: auto !important;
+            }
+            
+            .page {
+                overscroll-behavior: none !important;
+                -webkit-overflow-scrolling: auto !important;
+            }
+        `;
+        document.head.appendChild(style);
 
         // 添加页码变量
         let page = 1;
@@ -514,7 +536,7 @@
                 assetsDiv.innerHTML = '<p>Loading...</p>';
 
                 const apiDomain = getApiDomain();
-                const response = await fetch(`${apiDomain}/api/v3/explore/collections?limit=20&sortBy=-tradingVolume&tradingDays=${period}&isSimple=true&page=${page}`);
+                const response = await fetch(`${apiDomain}/api/v3/explore/collections?limit=30&sortBy=-tradingVolume&tradingDays=${period}&isSimple=true&page=${page}`);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -610,7 +632,7 @@
                 
                 const apiDomain = getApiDomain();
                 const response = await fetch(
-                    `${apiDomain}/api/v3/explore/assets?limit=20&collectionSlugs[0]=${currentSlug}&sortBy=bestListPrice&chainId=${currentChainId}&isCount=true&page=${nftPage}`,
+                    `${apiDomain}/api/v3/explore/assets?limit=30&collectionSlugs[0]=${currentSlug}&sortBy=bestListPrice&chainId=${currentChainId}&isCount=true&page=${nftPage}`,
                     { signal: currentController.signal }
                 );
                 

@@ -79,7 +79,7 @@ app.get('/messages', (req, res) => {
 app.get('/assets', (req, res) => {
     const page = Number(req.query.page || 1);
     const searchKeyword = String(req.query.keyword || '');
-    const limit = 20;
+    const limit = 30;
     const offset = (page - 1) * limit;
 
     try {
