@@ -396,6 +396,33 @@
     </div>
 
     <script>
+        // 在脚本开始处添加这段代码
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.expand(); // 展开 webapp
+            // 禁用下拉关闭手势
+            window.Telegram.WebApp.setBackgroundColor('#ffffff'); // 设置背景色
+            window.Telegram.WebApp.enableClosingConfirmation(); // 启用关闭确认
+        }
+
+        // 添加触摸事件处理，防止下拉关闭
+        document.addEventListener('touchstart', function(e) {
+            const target = e.target;
+            const scrollableElement = target.closest('.nft-grid, .grid-container') || document.documentElement;
+            
+            if (scrollableElement.scrollTop === 0) {
+                scrollableElement.scrollTop = 1;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function(e) {
+            const target = e.target;
+            const scrollableElement = target.closest('.nft-grid, .grid-container') || document.documentElement;
+            
+            if (scrollableElement.scrollTop === 0) {
+                scrollableElement.scrollTop = 1;
+            }
+        }, { passive: true });
+
         // 添加页码变量
         let page = 1;
         let isLoading = false;
