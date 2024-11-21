@@ -51,7 +51,7 @@ bot.on('text', async (ctx) => {
     ctx.reply(`Searching for: ${keyword}`);
 
     try {
-        const response = await axios.get('https://v3-api.lootex.io/api/v3/explore/assets', {
+        const response = await axios.get('https://dex-v3-api-aws.lootex.dev/api/v3/explore/assets', {
             params: {
                 limit: 30,
                 sortBy: '-bestListPrice',
@@ -99,7 +99,7 @@ app.get('/search', async (req, res) => {
     const page = Number(req.query.page || 1);
 
     try {
-        const apiUrl = 'https://v3-api.lootex.io/api/v3/explore/assets';
+        const apiUrl = 'https://dex-v3-api-aws.lootex.dev/api/v3/explore/assets';
 
         console.log('Received search request:', { keyword, page });
 
