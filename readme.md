@@ -1,71 +1,67 @@
-# 项目名称
+# Lootex Telegram Mini App
 
-简要描述项目的功能和目的。
+A Telegram Mini App for browsing NFT collections and assets on Lootex marketplace.
 
-## 目录
+## Features
 
-- [安装
-](#安装)
-- [使用
-](#使用)
-- [功能
-](#功能)
-- [贡献
-](#贡献)
-- [许可证
-](#许可证)
+- Browse hot NFT collections sorted by trading volume
+- View collection details and NFTs
+- Time-based filtering (24H, 7D, 30D, All Time)
+- Responsive design for mobile devices
+- Dark mode support
+- Infinite scroll loading
+- Image loading optimization with placeholders
 
-## 安装
+## Tech Stack
 
-1. 克隆此仓库：
+- Frontend: Pure HTML, CSS, and JavaScript
+- Backend: Node.js with Express
+- API Integration: Lootex V3 API
+- Deployment: Vercel
+- Bot Framework: Telegraf
+
+## Development Setup
+
+1. Clone the repository:
    ```bash
-   git clone https: //github.com/yourusername/your-repo.git
+   git clone https://github.com/yourusername/loot
    ```
-2. 进入项目目录：
+2. Enter the project directory:
    ```bash
-   cd your-repo
+   cd loot
    ```
-3. 安装依赖：
+3. Install dependencies:
    ```bash
    npm install
    ```
 
-## 使用
+## Usage
 
-1. 启动服务器：
+1. Start the server:
    ```bash
    npm start
    ```
-2. 打开浏览器并访问 `http: //localhost:3000`。
+2. Open your browser and visit `http://localhost:3000`.
 
-## 功能
+## Contribution
 
-- 搜索功能：用户可以通过输入关键字搜索资产。
-- 无限滚动：当用户滚动到页面底部时，自动加载更多资产。
-- 占位符图像：在图像加载之前显示占位符。
-- 复制 Token ID：用户可以通过点击按钮复制 Token ID。
-- 防抖动输入：减少输入时的 UI 卡顿现象。
+We welcome any form of contribution! Please follow these steps:
 
-## 贡献
-
-欢迎任何形式的贡献！请遵循以下步骤：
-
-1. Fork 此仓库。
-2. 创建您的特性分支：
+1. Fork this repository.
+2. Create your feature branch:
    ```bash
    git checkout -b feature/YourFeature
    ```
-3. 提交您的更改：
+3. Commit your changes:
    ```bash
    git commit -m 'Add some feature'
    ```
-4. 推送到分支：
+4. Push to the branch:
    ```bash
    git push origin feature/YourFeature
    ```
-5. 创建一个新的 Pull Request。
+5. Create a new Pull Request.
 
-## 许可证
+## License
 
-此项目使用 [MIT 许可证
-](LICENSE)。
+This project uses the [MIT License](LICENSE).
