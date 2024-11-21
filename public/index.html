@@ -401,8 +401,6 @@
             window.Telegram.WebApp.expand(); // 展开 webapp
             window.Telegram.WebApp.setBackgroundColor('#ffffff');
             window.Telegram.WebApp.enableClosingConfirmation();
-            // 禁用页面弹性滚动
-            document.body.style.overscrollBehavior = 'none';
         }
 
         // 修改触摸事件处理
@@ -410,37 +408,31 @@
         
         document.addEventListener('touchstart', function(e) {
             startY = e.touches[0].pageY;
-            const target = e.target;
-            const scrollableElement = target.closest('.nft-grid, .grid-container') || document.documentElement;
-            
-            // 如果在顶部，阻止默认行为
-            if (scrollableElement.scrollTop <= 0) {
-                e.preventDefault();
-            }
-        }, { passive: false });
+        }, { passive: true });
 
         document.addEventListener('touchmove', function(e) {
             const currentY = e.touches[0].pageY;
             const target = e.target;
-            const scrollableElement = target.closest('.nft-grid, .grid-container') || document.documentElement;
+            const scrollableElement = target.closest('.nft-grid, .grid-container');
             
-            // 如果在顶部并且是下拉动作
-            if (scrollableElement.scrollTop <= 0 && currentY > startY) {
+            // 只有在可滚动元素存在，且在顶部下拉时才阻止默认行为
+            if (scrollableElement && 
+                scrollableElement.scrollTop === 0 && 
+                currentY > startY) {
                 e.preventDefault();
             }
         }, { passive: false });
 
-        // 添加 CSS 样式来禁用弹性滚动
+        // 修改 CSS 样式
         const style = document.createElement('style');
         style.textContent = `
-            body, .nft-grid, .grid-container {
-                overscroll-behavior: none !important;
-                -webkit-overflow-scrolling: auto !important;
+            body {
+                overscroll-behavior-y: contain;
             }
             
-            .page {
-                overscroll-behavior: none !important;
-                -webkit-overflow-scrolling: auto !important;
+            .nft-grid, .grid-container {
+                overscroll-behavior-y: contain;
+                -webkit-overflow-scrolling: touch;
             }
         `;
         document.head.appendChild(style);
