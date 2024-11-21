@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const axios = require('axios').default;
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -51,7 +52,9 @@ bot.on('text', async (ctx) => {
     ctx.reply(`Searching for: ${keyword}`);
 
     try {
-        const response = await axios.get('https://v3-api.lootex.io/api/v3/explore/assets', {
+        // 使用生产环境的 API 域名
+        const apiDomain = 'https://v3-api.lootex.io';
+        const response = await axios.get(`${apiDomain}/api/v3/explore/assets`, {
             params: {
                 limit: 30,
                 sortBy: '-bestListPrice',
@@ -94,16 +97,21 @@ app.get('/assets', (req, res) => {
     }
 });
 
+// 添加 API 域名判断函数
+function getApiDomain(req) {
+    const host = req.get('host');
+    return host.includes('localhost') || host.includes('127.0.0.1')
+        ? 'https://dex-v3-api-aws.lootex.dev'
+        : 'https://v3-api.lootex.io';
+}
+
+// 搜索接口
 app.get('/search', async (req, res) => {
-    const keyword = String(req.query.keyword || '');
-    const page = Number(req.query.page || 1);
-
     try {
-        const apiUrl = 'https://v3-api.lootex.io/api/v3/explore/assets';
-
-        console.log('Received search request:', { keyword, page });
-
-        const response = await axios.get(apiUrl, {
+        const { keyword, page } = req.query;
+        const apiDomain = getApiDomain(req);
+        
+        const response = await axios.get(`${apiDomain}/api/v3/explore/assets`, {
             params: {
                 limit: 30,
                 sortBy: '-bestListPrice',
@@ -113,25 +121,7 @@ app.get('/search', async (req, res) => {
             }
         });
 
-        console.log('Lootex API response status:', response.status);
-
-        if (response.status !== 200) {
-            throw new Error(`API responded with status: ${response.status}`);
-        }
-
-        if (!response.data || !response.data.items) {
-            console.log('No items in response:', response.data);
-            return res.json([]);
-        }
-
-        const items = response.data.items.map(item => ({
-            assetName: item.assetName || 'Unnamed Asset',
-            assetTokenId: item.assetTokenId || 'No ID',
-            assetImageUrl: item.assetImageUrl || '',
-            collectionName: item.collectionName || 'Unknown Collection',
-            collectionChainShortName: item.collectionChainShortName || 'Unknown',
-            order: item.order || null
-        }));
+        const items = response.data.items || [];
 
         // 检查价格和链的提取
         items.forEach(item => {
