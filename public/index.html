@@ -253,6 +253,16 @@
                     return;
                 }
 
+                // 添加数字格式化函数
+                function formatNumber(num) {
+                    if (num >= 1000000) {
+                        return (num / 1000000).toFixed(2) + 'M';
+                    } else if (num >= 1000) {
+                        return (num / 1000).toFixed(2) + 'K';
+                    }
+                    return num.toFixed(2);
+                }
+
                 collections.forEach(collection => {
                     const collectionElement = document.createElement('div');
                     collectionElement.className = 'grid-item';
@@ -279,7 +289,7 @@
                         <div class="item-details">
                             <p class="item-name">${collection.name || 'Unnamed Collection'}</p>
                             <p class="item-collection">Chain: ${collection.chainShortName.toUpperCase()}</p>
-                            <p class="item-price">Volume: $${collection.totalVolume.toFixed(2)}</p>
+                            <p class="item-price">Volume: $${formatNumber(collection.totalVolume)}</p>
                             <p>Trades: ${collection.totalTradingCount}</p>
                         </div>
                     `;
