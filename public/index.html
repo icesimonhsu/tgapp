@@ -4,34 +4,21 @@
 <head>
     <title>TWA</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             transition: background-color 0.3s, color 0.3s;
             font-size: 14px;
+            margin: 0;
+            padding: 16px;
         }
 
         /* Day mode */
         body {
             background-color: white;
             color: black;
-        }
-
-        .grid-item {
-            background-color: #f9f9f9;
-        }
-
-        /* Night mode */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: black;
-                color: white;
-            }
-
-            .grid-item {
-                background-color: #333;
-            }
         }
 
         .grid-container {
@@ -49,6 +36,7 @@
             padding: 15px;
             border-radius: 8px;
             gap: 20px;
+            background-color: #f9f9f9;
             transition: transform 0.2s;
         }
 
@@ -56,94 +44,25 @@
             transform: translateX(5px);
         }
 
-        .grid-item img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
-            flex-shrink: 0;
-        }
-
-        .item-details {
-            flex-grow: 1;
-            text-align: left;
-        }
-
-        .item-details p {
-            margin: 3px 0;
-            line-height: 1.3;
-        }
-
-        .item-name {
-            font-weight: bold;
-            font-size: 1em;
-        }
-
-        .item-price {
-            color: #2196F3;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-
-        .item-collection {
-            color: #666;
-            font-size: 0.85em;
-        }
-
-        .item-blockchain {
-            background-color: #e3f2fd;
-            color: #1565c0;
-            padding: 1px 6px;
-            border-radius: 4px;
-            display: inline-block;
-            font-size: 0.75em;
-        }
-
-        /* 深色模式調整 */
-        @media (prefers-color-scheme: dark) {
-            .grid-item {
-                background-color: #333;
-            }
-
-            .item-collection {
-                color: #aaa;
-            }
-
-            .item-blockchain {
-                background-color: #1a237e;
-                color: #90caf9;
-            }
-
-            .item-price {
-                color: #64b5f6;
-            }
-        }
-
-        .controls {
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .controls input {
-            padding: 10px;
-            font-size: 16px;
-            width: 200px;
-            margin-right: 10px;
-        }
-
-        .controls button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
         .image-container {
-            position: relative;
             width: 80px;
             height: 80px;
-            background-color: #f0f0f0;
+            position: relative;
             border-radius: 8px;
             overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .image-container img.loaded {
+            opacity: 1;
         }
 
         .placeholder {
@@ -155,30 +74,82 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f0f0f0;
             color: #666;
         }
 
-        .image-container img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        .item-details {
+            flex-grow: 1;
         }
 
-        .image-container img.loaded {
-            opacity: 1;
+        .item-details p {
+            margin: 3px 0;
         }
 
-        /* 深色模式下的 placeholder */
+        .item-name {
+            font-weight: bold;
+        }
+
+        .item-price {
+            color: #2196F3;
+            font-weight: bold;
+        }
+
+        .item-collection {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .controls input {
+            padding: 8px 12px;
+            font-size: 14px;
+            width: 200px;
+            margin-right: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .controls button {
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        /* Night mode */
         @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212;
+                color: white;
+            }
+
+            .grid-item {
+                background-color: #1e1e1e;
+            }
+
+            .image-container {
+                background-color: #2d2d2d;
+            }
+
             .placeholder {
-                background-color: #333;
                 color: #999;
+            }
+
+            .item-collection {
+                color: #aaa;
+            }
+
+            .controls input {
+                background-color: #2d2d2d;
+                border-color: #444;
+                color: white;
             }
         }
     </style>
@@ -191,153 +162,86 @@
         <button id="searchButton">Search</button>
     </div>
     <div class="grid-container" id="assets"></div>
+
     <script>
         let page = 1;
-        let keyword = '';
         let isLoading = false;
         let searchTimeout;
 
-        // Fetch messages from the server
-        async function fetchMessages() {
-            const response = await fetch('/messages');
-            const messages = await response.json();
-            const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML = '';
-            messages.forEach(message => {
-                const messageElement = document.createElement('p');
-                messageElement.textContent = message;
-                messagesDiv.appendChild(messageElement);
-            });
-        }
-
-        // Fetch assets from the server
-        async function fetchAssets() {
-            if (isLoading) return;
-            isLoading = true;
-            const response = await fetch(`/search?keyword=${keyword}&page=${page}`);
-            const assets = await response.json();
-            const assetsDiv = document.getElementById('assets');
-            assets.forEach(asset => {
-                const assetElement = document.createElement('div');
-                assetElement.className = 'grid-item';
-                assetElement.innerHTML = `
-                    <img src="${asset.assetImageUrl}" alt="${asset.assetName}">
-                    <p>${asset.assetName}</p>
-                    <p>Token ID: ${asset.assetTokenId}</p>
-                `;
-                assetsDiv.appendChild(assetElement);
-            });
-            isLoading = false;
-        }
-
-        // Search assets based on input keyword
         async function searchAssets(keyword) {
-            console.log('Searching for:', keyword);
-            isLoading = true;
-
-            // 直接调用 Lootex API
-            const response = await fetch(`https://dex-v3-api-aws.lootex.dev/api/v3/explore/assets?limit=30&sortBy=-bestListPrice&keywords=${encodeURIComponent(keyword)}&isCount=false&page=${page}`);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const assets = data.items || [];
-            console.log('Search results:', assets);
-
-            const assetsDiv = document.getElementById('assets');
-            assetsDiv.innerHTML = '';
-
-            if (assets.length === 0) {
-                assetsDiv.innerHTML = '<p>No results found</p>';
-                return;
-            }
-
-            assets.forEach(asset => {
-                const shortTokenId = asset.assetTokenId.length > 10 ?
-                    `${asset.assetTokenId.slice(0, 10)}...` : asset.assetTokenId;
-
-                let priceDisplay = 'No Price';
-                if (asset.order && asset.order.listing) {
-                    priceDisplay = `${asset.order.listing.price} ${asset.order.listing.priceSymbol}`;
+            try {
+                if (!keyword) {
+                    console.log('Empty search keyword');
+                    return;
                 }
 
-                const assetElement = document.createElement('div');
-                assetElement.className = 'grid-item';
-                assetElement.innerHTML = `
-                    <div class="image-container">
-                        <div class="placeholder">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                <polyline points="21 15 16 10 5 21"></polyline>
-                            </svg>
+                console.log('Searching for:', keyword);
+                isLoading = true;
+                const assetsDiv = document.getElementById('assets');
+                assetsDiv.innerHTML = '<p>Loading...</p>';
+
+                const response = await fetch(`https://dex-v3-api-aws.lootex.dev/api/v3/explore/assets?limit=30&sortBy=-bestListPrice&keywords=${encodeURIComponent(keyword)}&isCount=false&page=${page}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const assets = data.items || [];
+                
+                assetsDiv.innerHTML = '';
+
+                if (assets.length === 0) {
+                    assetsDiv.innerHTML = '<p>No results found</p>';
+                    return;
+                }
+
+                assets.forEach(asset => {
+                    const assetElement = document.createElement('div');
+                    assetElement.className = 'grid-item';
+                    
+                    const shortTokenId = asset.assetTokenId?.length > 8 
+                        ? `${asset.assetTokenId.slice(0, 8)}...` 
+                        : asset.assetTokenId || 'N/A';
+
+                    assetElement.innerHTML = `
+                        <div class="image-container">
+                            <div class="placeholder">Loading...</div>
+                            <img src="${asset.assetImageUrl}" 
+                                 alt="${asset.assetName}"
+                                 onload="this.classList.add('loaded')"
+                                 onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'>No Image</div>'">
                         </div>
-                        <img src="${asset.assetImageUrl}" 
-                             alt="${asset.assetName}"
-                             onload="this.classList.add('loaded')"
-                             onerror="this.parentElement.innerHTML='<div class=\'placeholder\'>❌</div>'">
-                    </div>
-                    <div class="item-details">
-                        <p class="item-name">${asset.assetName}</p>
-                        <p class="item-collection">${asset.collectionName}</p>
-                        <p class="item-price">Price: ${priceDisplay}</p>
-                        <p class="item-blockchain">${asset.collectionChainShortName?.toUpperCase() || 'Unknown Chain'}</p>
-                        <p class="token-id">Token ID: ${shortTokenId} <button onclick="copyTokenId('${asset.assetTokenId}')">📋</button></p>
-                    </div>
-                `;
-                assetsDiv.appendChild(assetElement);
-            });
-        }
-
-        // Clear assets
-        function clearAssets() {
-            const assetsDiv = document.getElementById('assets');
-            assetsDiv.innerHTML = '';
-            page = 1; // Reset page number
-            keyword = ''; // Clear keyword
-        }
-
-        // Debounce function to limit the rate of function execution
-        function debounce(func, wait) {
-            return function (...args) {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
-        // Infinite scroll
-        window.addEventListener('scroll', debounce(() => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) { // 提前500px请求数据
-                if (!isLoading) { // 确保在加载时不重复请求
-                    page++;
-                    fetchAssets();
-                }
+                        <div class="item-details">
+                            <p class="item-name">${asset.assetName || 'Unnamed Asset'}</p>
+                            <p class="item-collection">${asset.collectionName || 'Unknown Collection'}</p>
+                            <p class="item-price">Price: ${asset.bestListPrice || 'Not listed'}</p>
+                            <p>Token ID: ${shortTokenId}</p>
+                        </div>
+                    `;
+                    assetsDiv.appendChild(assetElement);
+                });
+            } catch (error) {
+                console.error('Search error:', error);
+                const assetsDiv = document.getElementById('assets');
+                assetsDiv.innerHTML = '<p>Error loading assets. Please try again later.</p>';
+            } finally {
+                isLoading = false;
             }
-        }, 200)); // 调整防抖动时间
+        }
 
-        // Fetch messages on page load
-        fetchMessages();
-
-        // 移除输入事件监听器，改为使用提交按钮
-        document.getElementById('searchButton').addEventListener('click', async () => {
-            const keyword = document.getElementById('searchInput').value;
-            if (keyword) {
-                await searchAssets(keyword);
-            } else {
-                console.log('Empty search keyword');
-            }
+        // 事件监听器
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const keyword = document.getElementById('searchInput').value.trim();
+            searchAssets(keyword);
         });
 
-        // 复制 tokenId 的函数
-        function copyTokenId(tokenId) {
-            navigator.clipboard.writeText(tokenId).then(() => {
-                alert('Token ID copied to clipboard!'); // 提示用户已复制
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-            });
-        }
+        document.getElementById('searchInput').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                const keyword = event.target.value.trim();
+                searchAssets(keyword);
+            }
+        });
     </script>
 </body>
 
