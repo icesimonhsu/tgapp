@@ -102,7 +102,7 @@ function getApiDomain(req) {
     const host = req.get('host');
     return host.includes('localhost') || host.includes('127.0.0.1')
         ? 'https://dex-v3-api-aws.lootex.dev'
-        : 'https://v3-api.lootex.io';
+        : 'https://dex-v3-api-aws.lootex.dev';
 }
 
 // 搜索接口
@@ -110,7 +110,7 @@ app.get('/search', async (req, res) => {
     try {
         const { keyword, page } = req.query;
         const apiDomain = getApiDomain(req);
-        
+
         const response = await axios.get(`${apiDomain}/api/v3/explore/assets`, {
             params: {
                 limit: 30,

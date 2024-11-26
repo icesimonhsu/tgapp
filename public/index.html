@@ -312,7 +312,8 @@
             }
         }
 
-        h1, .time-filter {
+        h1,
+        .time-filter {
             padding: 0 16px;
         }
 
@@ -340,8 +341,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* 暗色模式下的加载动画样式 */
@@ -382,7 +388,7 @@
         <div class="nav-bar">
             <button class="back-button" onclick="closePage()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
             </button>
             <h2 class="nav-title">Collection Name</h2>
@@ -405,19 +411,19 @@
 
         // 修改触摸事件处理
         let startY = 0;
-        
-        document.addEventListener('touchstart', function(e) {
+
+        document.addEventListener('touchstart', function (e) {
             startY = e.touches[0].pageY;
         }, { passive: true });
 
-        document.addEventListener('touchmove', function(e) {
+        document.addEventListener('touchmove', function (e) {
             const currentY = e.touches[0].pageY;
             const target = e.target;
             const scrollableElement = target.closest('.nft-grid, .grid-container');
-            
+
             // 只有在可滚动元素存在，且在顶部下拉时才阻止默认行为
-            if (scrollableElement && 
-                scrollableElement.scrollTop === 0 && 
+            if (scrollableElement &&
+                scrollableElement.scrollTop === 0 &&
                 currentY > startY) {
                 e.preventDefault();
             }
@@ -498,7 +504,7 @@
             const hostname = window.location.hostname;
             return hostname === 'localhost' || hostname === '127.0.0.1'
                 ? 'https://dex-v3-api-aws.lootex.dev'
-                : 'https://v3-api.lootex.io';
+                : 'https://dex-v3-api-aws.lootex.dev';
         }
 
         // 添加 pinataGateway 常量
@@ -520,7 +526,7 @@
         // 修改 fetchHotCollections 函数
         async function fetchHotCollections(period = 'today') {
             if (isLoading) return;
-            
+
             try {
                 console.log('Fetching collections for period:', period);
                 isLoading = true;
@@ -536,7 +542,7 @@
 
                 const data = await response.json();
                 const collections = data.collections || [];
-                
+
                 assetsDiv.innerHTML = '';
 
                 if (collections.length === 0) {
@@ -557,7 +563,7 @@
                 collections.forEach(collection => {
                     const collectionElement = document.createElement('div');
                     collectionElement.className = 'grid-item';
-                    
+
                     let logoUrl = collection.logoImageUrl;
                     // 处理 S3 URL
                     if (logoUrl && logoUrl.startsWith('https://lootex-dev-s3-cdn.imgix.net')) {
@@ -565,7 +571,7 @@
                     }
                     // 处理 IPFS URL
                     logoUrl = pinataLoader(logoUrl);
-                    
+
                     collectionElement.innerHTML = `
                         <div class="image-container">
                             <div class="placeholder">
@@ -592,7 +598,7 @@
                     collectionElement.addEventListener('click', () => {
                         openNftPage(collection.name, collection.slug, collection.chainId);
                     });
-                    
+
                     assetsDiv.appendChild(collectionElement);
                 });
             } catch (error) {
@@ -607,35 +613,35 @@
         // 修改 fetchNFTs 函数中的 API 请求
         async function fetchNFTs() {
             if (isNftLoading || !hasMoreNfts || !isPageActive) return;
-            
+
             try {
                 // 如果有正在进行的请求，取消它
                 if (currentController) {
                     currentController.abort();
                 }
-                
+
                 // 创建新的 AbortController
                 currentController = new AbortController();
                 isNftLoading = true;
-                
+
                 if (nftPage === 1) {
                     showLoading(); // 仅在第一页加载时显示动画
                 }
-                
+
                 const apiDomain = getApiDomain();
                 const response = await fetch(
                     `${apiDomain}/api/v3/explore/assets?limit=30&collectionSlugs[0]=${currentSlug}&sortBy=bestListPrice&chainId=${currentChainId}&isCount=true&page=${nftPage}`,
                     { signal: currentController.signal }
                 );
-                
+
                 // 如果页面已关闭，直接返回
                 if (!isPageActive) return;
-                
+
                 if (!response.ok) throw new Error('Network response was not ok');
-                
+
                 const data = await response.json();
                 const items = data.items || [];
-                
+
                 if (items.length === 0) {
                     hasMoreNfts = false;
                     return;
@@ -645,7 +651,7 @@
                 if (!isPageActive) return;
 
                 const grid = document.getElementById('nftGrid');
-                
+
                 // 添加默认占位图片的 base64 字符串
                 const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNFNUU1RTUiLz48cGF0aCBkPSJNODAgOTBINzBWMTEwSDgwVjkwWiIgZmlsbD0iIzk5OSIvPjxwYXRoIGQ9Ik0xMzAgOTBIMTIwVjExMEgxMzBWOTBaIiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTEwMCAxMzBDMTEzLjgwNyAxMzAgMTI1IDExOC44MDcgMTI1IDEwNUMxMjUgOTEuMTkyOSAxMTMuODA3IDgwIDEwMCA4MEM4Ni4xOTI5IDgwIDc1IDkxLjE5MjkgNzUgMTA1Qzc1IDExOC44MDcgODYuMTkyOSAxMzAgMTAwIDEzMFoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
 
@@ -658,7 +664,7 @@
                     // 处理 IPFS URL
                     imageUrl = pinataLoader(imageUrl);
 
-                    const price = nft.order?.listing?.price 
+                    const price = nft.order?.listing?.price
                         ? `${nft.order.listing.price} ${nft.order.listing.priceSymbol}`
                         : 'No Price';
 
@@ -704,7 +710,7 @@
         }
 
         // 修改滚动事件监听器
-        document.querySelector('.nft-grid').addEventListener('scroll', function(e) {
+        document.querySelector('.nft-grid').addEventListener('scroll', function (e) {
             if (!isPageActive) return;
             const { scrollTop, scrollHeight, clientHeight } = e.target;
             if (scrollHeight - scrollTop <= clientHeight * 1.5) {
@@ -720,7 +726,7 @@
                     btn.classList.remove('active');
                 });
                 button.classList.add('active');
-                
+
                 // 获取并更新时间段
                 currentPeriod = button.dataset.period;
                 page = 1; // 重置页码
